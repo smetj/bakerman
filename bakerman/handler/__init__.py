@@ -40,32 +40,32 @@ import pkgutil
 from typing import Type
 
 
-def discoverRepoHandler(url: str, workdir: str) -> Type[SkeletonRepo]:
+def discoverRepoHandler(uri: str, workdir: str) -> Type[SkeletonRepo]:
     """
     Factory function which returns a suitable Module for the provided arguments.
 
     Args:
-        url: The CVS URL identifying the remote repository.
+        uri: The CVS URI identifying the remote repository.
         workdir: The directory to which the remote repo will be stored.
 
     Returns:
-        A `bakerman.plugin.repo` module capable to handle `url`.
+        A `bakerman.plugin.repo` module capable to handle `uri`.
 
     Raises:
 
         NotImplementedError: No suitable repo plugin was found for the
-                             provided `url`.
+                             provided `uri`.
     """
 
     for repo_plugin in pkgutil.iter_modules(repo.__path__):  # type: ignore  # mypy issue #1422
         module = importlib.import_module(
             ".plugin.repo.%s" % repo_plugin.name, package="bakerman"
         )
-        m = module.discovery(url, workdir)  # type: ignore
+        m = module.discovery(uri=uri, workdir=workdir)  # type: ignore # I don't understand this
         if m:
             return m
 
-    raise NotImplementedError("No suitable 'repo' plugin found for '%s'" % (url))
+    raise NotImplementedError("No suitable 'repo' plugin found for '%s'" % (uri))
 
 
 def discoverRenderHandler(workdir: str, filename: str) -> Type[SkeletonRender]:

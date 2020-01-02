@@ -53,8 +53,8 @@ def parseArguments() -> argparse.Namespace:
         "--repo",
         type=str,
         dest="repo",
-        help="The URL of the repository to update.",
-        required=True,
+        default=None,
+        help="The URL of the repository to update. If omitted --workdir is expected to already contain a repo.",
     )
     parser.add_argument(
         "--manifest",
@@ -74,8 +74,8 @@ def parseArguments() -> argparse.Namespace:
         "--workdir",
         type=str,
         dest="workdir",
-        default="/var/tmp/bakerman",
-        help="The local workdir in which the repository is cloned",
+        required=True,
+        help="The local workdir containing the repository",
     )
     parser.add_argument(
         "--target",
@@ -105,8 +105,8 @@ def start(args: argparse.Namespace) -> None:
         # Get the repository handler which is responsible for doing all the
         # CVS interaction in which the container build and Bakerman files are
         # stored.
-        repo_cls = discoverRepoHandler(args.repo, args.workdir)
-        repo = repo_cls(args.repo, args.workdir)
+        repo_cls = discoverRepoHandler(workdir=args.workdir, uri=args.repo)
+        repo = repo_cls(uri=args.repo, workdir=args.workdir)
 
         # Get the render handler which is responsible for rendering the
         # `--template` file using the arguments the manifest handler comes up

@@ -46,10 +46,17 @@ def discovery(uri: str, workdir: str) -> Optional[Type["Git"]]:
         The the `Git` class or None.
     """
 
-    if uri.endswith(".git"):
+    if uri and uri.endswith(".git"):
         return Git
     else:
-        return None
+        try:
+            executeCommand(
+                ["git", "-C", workdir, "status"], logger,
+            )
+        except Exception:
+            return None
+        else:
+            return Git
 
 
 class Git(Skeleton):
@@ -59,9 +66,10 @@ class Git(Skeleton):
 
         Arguments:
             uri: The Git based repo URI
+            workdir: The directory containing the repo
         """
 
-        Skeleton.__init__(self, uri, workdir)
+        Skeleton.__init__(self, uri=uri, workdir=workdir)
 
     def checkPrerequisits(self) -> None:
         """

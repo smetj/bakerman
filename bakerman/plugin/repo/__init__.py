@@ -30,7 +30,7 @@ logger = getLogger("plugin::repo")
 
 
 class Skeleton:
-    def __init__(self, uri, workdir):
+    def __init__(self, workdir, uri=None):
         self.uri = uri
         self.workdir = workdir
 
@@ -46,9 +46,15 @@ class Skeleton:
         if self.checkValidRepo():
             logger.debug("%s is a valid repository. Updating." % (self.workdir))
             self.update()
-        else:
+        elif uri:
             logger.debug("%s is a not a valid repository. Cloning." % (self.workdir))
             self.clone()
+        else:
+            logger.debug(
+                "%s is a not a valid repository and no URI to clone. Giving up."
+                % (self.workdir)
+            )
+            sys.exit(0)
 
     def checkPrerequisites(self):
         raise NotImplementedError(
