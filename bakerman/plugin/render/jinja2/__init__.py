@@ -25,40 +25,61 @@
 import jinja2
 from bakerman.helper import getLogger
 from bakerman.plugin.render import Skeleton
+from typing import Type, Optional, Dict
 
 logger = getLogger("plugin:render:jinja2")
 
 
-def discovery(workdir, template):
+def discovery(workdir: str, filename: str) -> Optional[Type["Jinja2"]]:
+    """
+    Function expected by the `bakerman.handler.discoverRenderHandler` factory
+    function to determine `bakerman.plugin.render.jinja2.Handler` is
+    the required Plugin for `filename`.
+
+    Arguments:
+        workdir: The directory containing the template
+        filename: The file name of the template
+
+    Returns:
+        The the `Jinja2` class or None.
+    """
 
     env = jinja2.Environment()
     try:
-        with open("%s/%s" % (workdir, template)) as t:
+        with open("%s/%s" % (workdir, filename)) as t:
             env.parse(t.read())
     except Exception as err:
         logger.debug(
             "%s/%s is not a valid jinja2 template. Reason: %s"
-            % (workdir, template, err)
+            % (workdir, filename, err)
         )
-        return False
+        return None
     else:
         logger.debug(
             "%s/%s is a valid jinja2 template. Picking Jinja2 as template renderer."
-            % (workdir, template)
+            % (workdir, filename)
         )
-        return Handler
+        return Jinja2
 
 
-class Handler(Skeleton):
-    def __init__(self, workdir, template, dockerfile):
+class Jinja2(Skeleton):
+    def __init__(self, workdir: str, template: str, target: str) -> None:
+        """
+        Bakerman render plugin offering Jinja2 support.
+
+        Args:
+            workdir: The directory containing the template file
+            template: The filename of the template
+            target: The target file containing the rendered result.
+        """
 
         self.workdir = workdir
         self.template = template
-        self.dockerfile = dockerfile
+        self.target = target
 
-    def render(self, kwargs):
+    def render(self, kwargs: Dict) -> None:
         with open(f"{self.workdir}/{self.template}") as r:
             template = jinja2.Template("".join(r.readlines()))
-            with open(f"{self.workdir}/{self.dockerfile}", "w") as w:
-                logger.debug(f"Writing {self.workdir}/{self.dockerfile}.")
+            with open(f"{self.workdir}/{self.target}", "w") as w:
+                logger.debug(f"Writing {self.workdir}/{self.target}.")
                 w.write(template.render(**kwargs))

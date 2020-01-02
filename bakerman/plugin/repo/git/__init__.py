@@ -27,25 +27,47 @@ from bakerman.helper import getLogger
 from bakerman.helper import executeCommand
 from socket import gethostname
 import os
+from typing import Type, Optional
 
 logger = getLogger("plugin:repo:git")
 
 
-def discovery(url, workdir):
+def discovery(uri: str, workdir: str) -> Optional[Type["Git"]]:
+    """
+    Function expected by the `bakerman.handler.discoverRepoHandler` factory
+    function to determine `bakerman.plugin.lookup.alpine_package.Handler` is
+    the required Plugin for `name`.
 
-    if executeCommand(["git", "-C", workdir, "status"], logger):
-        return Handler
-    elif url.endswith(".git"):
-        return Handler
+    Arguments:
+        uri: The CVS URI.
+        workdir: The directory to store the CVS content
+
+    Returns:
+        The the `Git` class or None.
+    """
+
+    if uri.endswith(".git"):
+        return Git
     else:
-        return False
+        return None
 
 
-class Handler(Skeleton):
-    def __init__(self, url, workdir):
-        Skeleton.__init__(self, url, workdir)
+class Git(Skeleton):
+    def __init__(self, uri: str, workdir: str) -> None:
+        """
+        The Bakerman CVS plugin handler for Git.
 
-    def checkPrerequisits(self):
+        Arguments:
+            uri: The Git based repo URI
+        """
+
+        Skeleton.__init__(self, uri, workdir)
+
+    def checkPrerequisits(self) -> None:
+        """
+        Validates whether we can find the "git" command.
+        """
+
         executeCommand(["which", "git"], logger)
 
     def checkValidRepo(self):
@@ -62,7 +84,7 @@ class Handler(Skeleton):
     def clone(self):
 
         executeCommand(
-            ["git", "-C", self.workdir, "clone", self.url, self.workdir], logger
+            ["git", "-C", self.workdir, "clone", self.uri, self.workdir], logger
         )
 
     def update(self):

@@ -22,13 +22,13 @@
 #
 #
 import argparse
+
 import sys
 from bakerman.handler import discoverRepoHandler
 from bakerman.handler import discoverRenderHandler
 from bakerman.handler import discoverManifestHandler
-from bakerman.helper import lookupVariables
 from bakerman.handler import discoverLookupHandler
-
+from bakerman.helper import lookupVariables
 from bakerman.helper import getLogger
 
 COMMIT_MESSAGE = """
@@ -37,17 +37,23 @@ Bakerman committed following changes:
 """
 
 
-def parseArguments():
+def parseArguments() -> argparse.Namespace:
+    """
+    Defines and parses the CLI provided arguments.
+
+    Returns:
+        - NameSpace object containing all arguments
+    """
 
     parser = argparse.ArgumentParser(
-        description="Update your Dockerfiles to include the latest containers and packages.",
+        description="Automatically regenerate config files to include the latest artifact versions.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--repo",
         type=str,
         dest="repo",
-        help="The URL of the repository containing the Dockerfile",
+        help="The URL of the repository to update.",
         required=True,
     )
     parser.add_argument(
@@ -61,8 +67,8 @@ def parseArguments():
         "--template",
         type=str,
         dest="template",
-        default="Dockerfile.template",
-        help="The Dockerfile template to render.",
+        default="bakerman.template",
+        help="The template to render.",
     )
     parser.add_argument(
         "--workdir",
@@ -72,17 +78,25 @@ def parseArguments():
         help="The local workdir in which the repository is cloned",
     )
     parser.add_argument(
-        "--dockerfile",
+        "--target",
         type=str,
-        dest="dockerfile",
-        default="Dockerfile",
-        help="The path of the docker build file which --template will render into.",
+        dest="target",
+        default="bakerman.target",
+        help="The path of the target build file which --template will render into.",
     )
 
     return parser.parse_args()
 
 
-def start(args):
+def start(args: argparse.Namespace) -> None:
+    """
+    Main Bakerman logic.
+    Performs
+
+    Raises:
+        Exception: An unhandled error happened and should be made clear to the
+        user as this indicates a bug for which a report should be made.
+    """
 
     logger = getLogger("main")
     commit_message = []
@@ -93,13 +107,12 @@ def start(args):
         # stored.
         repo_cls = discoverRepoHandler(args.repo, args.workdir)
         repo = repo_cls(args.repo, args.workdir)
-        repo
 
         # Get the render handler which is responsible for rendering the
         # `--template` file using the arguments the manifest handler comes up
         # with
         render_cls = discoverRenderHandler(args.workdir, args.template)
-        docker_file = render_cls(args.workdir, args.template, args.dockerfile)
+        target_file = render_cls(args.workdir, args.template, args.target)
 
         # Get the manifest handler which is responsible for reading and
         # writing the manifest file and returning a Python data structure.
@@ -129,16 +142,16 @@ def start(args):
         # Render the template file using the new found version numbers.
         if manifest_updated:
             logger.info(
-                f"The manifest has been updated. Regenerating Dockerfile '{args.workdir}/{args.dockerfile}'"
+                f"The manifest has been updated. Regenerating target file '{args.workdir}/{args.target}'"
             )
-            docker_file.render(variables)
+            target_file.render(variables)
 
             logger.info(f"Committing changes and pushing repo.")
             repo.commit(COMMIT_MESSAGE % "\n".join(commit_message))
             repo.push()
         else:
             logger.info(
-                f"The manifest has not been updated. Not regenerating Dockerfile '{args.workdir}/{args.dockerfile}'"
+                f"The manifest has not been updated. Not regenerating target file '{args.workdir}/{args.target}'"
             )
 
     except NotImplementedError as err:

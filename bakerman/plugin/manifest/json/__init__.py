@@ -25,11 +25,25 @@
 import json
 from bakerman.plugin.manifest import Skeleton
 from bakerman.helper import getLogger
+from typing import List, Dict, Optional, Type
+
 
 logger = getLogger("plugin:manifest:json")
 
 
-def discovery(workdir, manifest):
+def discovery(workdir: str, manifest: str) -> Optional[Type["JSON"]]:
+    """
+    Function expected by the `bakerman.handler.discoverLookupHandler` factory
+    function to determine `bakerman.plugin.lookup.docker_hub.Handler` is
+    the required Plugin for `name`.
+
+    Arguments:
+        workdir: The directory containing the manifest.
+        manifest: The file name of the manifest.
+
+    Returns:
+        The `JSON` class or `None`
+    """
 
     try:
         with open("%s/%s" % (workdir, manifest)) as j:
@@ -38,30 +52,54 @@ def discovery(workdir, manifest):
         logger.debug(
             "%s/%s is not a valid JSON file. Reason: %s" % (workdir, manifest, err)
         )
-        return False
+        return None
     else:
         logger.debug(
             "%s/%s is a valid JSON file. Picking JSON as manifest handler."
             % (workdir, manifest)
         )
-        return Handler
+        return JSON
 
 
-class Handler(Skeleton):
-    def __init__(self, workdir, template):
+class JSON(Skeleton):
+    def __init__(self, workdir: str, filename: str) -> None:
+        """
+        The Bakerman manifest handling plugin responsible for reading,
+        manipulating and updating the Bakerman manifest file.
+
+        Arguments:
+            workdir: The directory containing the manifest file
+            filename: The filename of the manifest file.
+        """
 
         self.workdir = workdir
-        self.template = template
-        self.__cache = []
+        self.filename = filename
+        self.__cache: List[Dict] = []
         self.__changed = False
 
-    def read(self):
+    def read(self) -> List[Dict]:
+        """
+        Reads and returns the content of the manifest file.
 
-        with open(f"{self.workdir}/{self.template}") as f:
+        Returns:
+            The contente of the manifest file.
+        """
+
+        with open(f"{self.workdir}/{self.filename}") as f:
             self.__cache = json.load(f)
             return self.__cache
 
-    def updateVariable(self, name, value):
+    def updateVariable(self, name: str, value: str) -> bool:
+        """
+        Updates the version of a variable.
+
+        Arguments:
+            name: The name of the argument
+            value: The new version value
+
+        Returns:
+            `True` when the value has been updated `False` if not.
+        """
 
         for index_1, item in enumerate(self.__cache):
             for index_2, variable in enumerate(item["values"]):
@@ -75,10 +113,13 @@ class Handler(Skeleton):
                     return True
         return False
 
-    def write(self):
+    def write(self) -> bool:
+        """
+        Write the updated version of the manifest back to disk.
+        """
         if self.__changed is True:
             logger.debug("The manifest has changed. Writing differences.")
-            with open(f"{self.workdir}/{self.template}", "w") as f:
+            with open(f"{self.workdir}/{self.filename}", "w") as f:
                 f.write(json.dumps(self.__cache, sort_keys=True, indent=2))
             return True
         else:

@@ -24,14 +24,11 @@
 
 from . import *
 import sys
+from typing import Optional
 
 
 class Skeleton:
-    def __init__(self, workdir, template):
-        self.workdir = workdir
-        self.template = template
-
-    def lookup(self):
+    def lookup(self, name: str) -> Optional[str]:
         raise NotImplementedError(
             "`%s` method not implemented by `%s` plugin."
             % (sys._getframe().f_code.co_name, self.__class__)

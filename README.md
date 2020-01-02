@@ -1,32 +1,32 @@
 # Bakerman
 
-Freshly baked containers
-
-**Bakerman is in alpha development status**
+A tool to automatically regenerate and commit configuration files to contain
+the latest artifact version values.
 
 ## Introduction
 
-Bakerman is a tool to automatically update repositories containing Docker
-image container build files to include the latest available version of the
-base container (FROM) and any other packages installed.
+Bakerman is a tool to lookup the latest version of artifacts and use the
+results to render new config files if said version have changed. Bakerman has
+a plugin system to lookup version info of said artifacts such as base Docker
+containers and Alpine packages.
 
-When a Dockerfile is regenerated, the changes get committed and pushed to your
-repository, ideally triggering a rebuild of the container by your build system
-resulting into always up-to-date containers using clear explicit versions.
+If a file is regenerated, bakerman commits and pushes the changes to your
+repository, ideally triggering a rebuild of the project resulting into always
+up-to-date builds using clear, explicit version definitions.
 
-Currently there's basic support for looking up the latest container from
-docker hub and the latest version of a alpine packages. Bakerman has a plugin
-system which should make it straight forward to plugin additional sources.
+Currently there's support for looking up the latest container from docker hub
+and the latest version of a alpine packages. Bakerman's plugin system allows
+adding additional lookup systems.
 
 ## Flow
 
-The following logic steps are executed by Bakerman:
+This is a high level logic:
 
     # Clone or update `--repo` into `--workdir`.
     # Read the manifest file `manifest` and retrieve the latest versions of
       the defined variables.
     # Render `--template` using the version found in step 2 and write the
-      outcome to `--dockerfile`.
+      outcome to the `--result_dir` directory.
     # Commit the changes defining which values have been updated.
     # Push commits to the remote repository.
 
@@ -34,18 +34,17 @@ The following logic steps are executed by Bakerman:
 
 ```
 $ bakerman --help
-usage: bakerman [-h] --repo REPO [--manifest MANIFEST] [--template TEMPLATE] [--workdir WORKDIR] [--dockerfile DOCKERFILE]
+usage: bakerman [-h] --repo REPO [--manifest MANIFEST] [--template TEMPLATE] [--workdir WORKDIR] [--target TARGET]
 
-Update your Dockerfiles to include the latest containers and packages.
+Automatically regenerate config files to include the latest artifact versions.
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --repo REPO           The URL of the repository containing the Dockerfile (default: None)
-  --manifest MANIFEST   The Bakerman manifest containing the package and container versions. (default: bakerman.manifest)
-  --template TEMPLATE   The Dockerfile template to render. (default: Dockerfile.template)
-  --workdir WORKDIR     The local workdir in which the repository is cloned (default: /var/tmp/bakerman)
-  --dockerfile DOCKERFILE
-                        The path of the docker build file which --template will render into. (default: Dockerfile)
+  -h, --help           show this help message and exit
+  --repo REPO          The URL of the repository to update. (default: None)
+  --manifest MANIFEST  The Bakerman manifest containing the package and container versions. (default: bakerman.manifest)
+  --template TEMPLATE  The template to render. (default: bakerman.template)
+  --workdir WORKDIR    The local workdir in which the repository is cloned (default: /var/tmp/bakerman)
+  --target TARGET      The path of the target build file which --template will render into. (default: bakerman.target)
 ```
 
 ## Example config files

@@ -25,46 +25,51 @@
 from bakerman.helper import getLogger
 import requests
 import sys
-import semver
+import semver  # type: ignore
 from functools import cmp_to_key
-
+from typing import Optional, Type
 
 logger = getLogger("plugin:lookup:docker_hub")
 
 
-def discovery(name):
+def discovery(name: str) -> Optional[Type["DockerHub"]]:
+    """
+    Function expected by the `bakerman.handler.discoverLookupHandler` factory
+    function to determine `bakerman.plugin.lookup.docker_hub.Handler` is
+    the required Plugin for `name`.
+
+    Arguments:
+        name: The name of the lookup type
+
+    Returns:
+        The `DockerHub` class or None
+    """
 
     if name == "docker_hub":
-        return Handler
+        return DockerHub
 
     else:
-        return False
+        return None
 
 
-class Handler:
-    def __init__(self):
-        pass
-        # if "BAKERMAN_PLUGIN_DOCKER_HUB_TOKEN" in os.environ:
-        #     logger.debug(
-        #         "Found BAKERMAN_PLUGIN_DOCKER_HUB_TOKEN using that for authentication"
-        #     )
-        # else:
-        #     logger.error(
-        #         "Could not find BAKERMAN_PLUGIN_DOCKER_HUB_TOKEN environment variable."
-        #     )
-        #     sys.exit(1)
+class DockerHub:
+    """
+    The Bakerman version lookup plugin for Docker Hub docker images. This
+    plugins does make a naive assumption that containers are always versioned
+    using semver.  If that's not the case the outcome might be unpredictable.
+    A better implementation is welcome.
+    """
 
-        # if "BAKERMAN_PLUGIN_DOCKER_HUB_USER" in os.environ:
-        #     logger.debug(
-        #         "Found BAKERMAN_PLUGIN_DOCKER_HUB_USER using that for authentication"
-        #     )
-        # else:
-        #     logger.error(
-        #         "Could not find BAKERMAN_PLUGIN_DOCKER_HUB_USER environment variable."
-        #     )
-        #     sys.exit(1)
+    def lookup(self, name) -> str:
+        """
+        Returns the latest available version off the container with name `name`.
 
-    def lookup(self, name):
+        Args:
+            name: The name of the package to lookup the latest available version.
+
+        Returns:
+            A version number.
+        """
 
         token = self.__getToken(None, None, name)
 

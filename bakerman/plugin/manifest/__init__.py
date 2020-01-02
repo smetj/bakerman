@@ -27,11 +27,23 @@ import sys
 
 
 class Skeleton:
-    def __init__(self, workdir, template):
+    def __init__(self, workdir: str, filename: str) -> None:
         self.workdir = workdir
-        self.template = template
+        self.filename = filename
 
     def read(self):
+        raise NotImplementedError(
+            "`%s` method not implemented by `%s` plugin."
+            % (sys._getframe().f_code.co_name, self.__class__)
+        )
+
+    def updateVariable(self, name: str, value: str) -> bool:
+        raise NotImplementedError(
+            "`%s` method not implemented by `%s` plugin."
+            % (sys._getframe().f_code.co_name, self.__class__)
+        )
+
+    def write(self):
         raise NotImplementedError(
             "`%s` method not implemented by `%s` plugin."
             % (sys._getframe().f_code.co_name, self.__class__)

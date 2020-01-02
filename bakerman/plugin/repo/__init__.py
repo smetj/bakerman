@@ -26,12 +26,12 @@ import os
 import sys
 from bakerman.helper import getLogger
 
-logger = getLogger("plugin")
+logger = getLogger("plugin::repo")
 
 
 class Skeleton:
-    def __init__(self, url, workdir):
-        self.url = url
+    def __init__(self, uri, workdir):
+        self.uri = uri
         self.workdir = workdir
 
         try:
@@ -69,6 +69,18 @@ class Skeleton:
         )
 
     def update(self):
+        raise NotImplementedError(
+            "`%s` method not implemented by `%s` plugin."
+            % (sys._getframe().f_code.co_name, self.__class__)
+        )
+
+    def commit(self, message):
+        raise NotImplementedError(
+            "`%s` method not implemented by `%s` plugin."
+            % (sys._getframe().f_code.co_name, self.__class__)
+        )
+
+    def push(self):
         raise NotImplementedError(
             "`%s` method not implemented by `%s` plugin."
             % (sys._getframe().f_code.co_name, self.__class__)

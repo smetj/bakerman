@@ -23,26 +23,48 @@
 #
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 from bakerman.helper import getLogger
+from bakerman.plugin.lookup import Skeleton
+from typing import Optional, Type
 
 logger = getLogger("plugin:lookup:alpine_package")
 
 
-def discovery(name):
+def discovery(name: str) -> Optional[Type["AlpinePackage"]]:
+    """
+    Function expected by the `bakerman.handler.discoverLookupHandler` factory
+    function to determine `bakerman.plugin.lookup.alpine_package.Handler` is
+    the required Plugin for `name`.
+
+    Arguments:
+        name: The name of type of lookup
+
+    Returns:
+        The the `AlpinePackage` class or None.
+    """
 
     if name == "alpine_package":
-        return Handler
-
+        return AlpinePackage
     else:
-        return False
+        return None
 
 
-class Handler:
-    def __init__(self):
-        pass
+class AlpinePackage(Skeleton):
+    """
+    The Bakerman version lookup plugin for Alpine Packages.
+    """
 
-    def lookup(self, name):
+    def lookup(self, name: str) -> Optional[str]:
+        """
+        Returns the latest package version off the package with name `name`.
+
+        Args:
+            name: The name of the package to lookup the latest available version.
+
+        Returns:
+            A version number.
+        """
 
         logger.debug("Doing a lookup for %s" % (name))
         response = requests.get(
@@ -53,3 +75,4 @@ class Handler:
 
         for item in page_content.find_all("td", class_="version"):
             return item.text
+        return None

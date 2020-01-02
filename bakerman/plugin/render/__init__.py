@@ -23,14 +23,26 @@
 #
 
 import sys
+from typing import Dict
 
 
 class Skeleton:
-    def __init__(self, workdir, template):
+    """
+    Base class for all Render plugin modules
+    """
+
+    def __init__(self, workdir: str, template: str, target: str) -> None:
         self.workdir = workdir
         self.template = template
+        self.target = target
 
-    def render(self, args):
+    def render(self, kwargs: Dict) -> None:
+        """
+        Renders the defined template using the provided `kwargs`.
+
+        Args:
+            kwargs: A dictionary of key/values used to render the template.
+        """
         raise NotImplementedError(
             "`%s` method not implemented by `%s` plugin."
             % (sys._getframe().f_code.co_name, self.__class__)
