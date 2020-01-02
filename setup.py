@@ -27,9 +27,9 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = "bakerman"
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 
-install_requires = ["requests"]
+install_requires = ["requests", "jinja2", "bs4", "semver"]
 
 dependency_links = []
 

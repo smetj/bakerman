@@ -1,5 +1,8 @@
 # Changes
 
+## Version 1.1.2
+- Add missing dependency
+
 ## Version 1.1.1
 
 - Allow Bakerman to when the --workdir contains a valid repo and clone isn't
