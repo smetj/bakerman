@@ -1,6 +1,11 @@
 # Changes
 
+## Version 1.1.3
+
+- Add support for Gitlab container repository lookups.
+
 ## Version 1.1.2
+
 - Add missing dependency
 
 ## Version 1.1.1

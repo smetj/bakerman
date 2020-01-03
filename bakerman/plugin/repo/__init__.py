@@ -92,6 +92,12 @@ class Skeleton:
             % (sys._getframe().f_code.co_name, self.__class__)
         )
 
+    def incrementTag(self):
+        raise NotImplementedError(
+            "`%s` method not implemented by `%s` plugin."
+            % (sys._getframe().f_code.co_name, self.__class__)
+        )
+
     def prepareDirectory(self):
         if not os.path.exists(self.workdir):
             os.mkdir(self.workdir)
