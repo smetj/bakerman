@@ -121,22 +121,32 @@ class Git(Skeleton):
         self.__addIncrementedTag()
 
     def push(self):
-        executeCommand(["git", "-C", self.workdir, "push"], logger)
         executeCommand(["git", "-C", self.workdir, "push", "--tags"], logger)
 
     def __addIncrementedTag(self):
 
-        current_tag = self.__getLatestTag().split(".")
-        current_tag[-1] = str(int(current_tag[-1]) + 1)
-        tag = ".".join(current_tag)
+        current_tag = self.__getLatestTag()
+        if current_tag is None:
+            tag = "1.0.0"
+        else:
+            current_tag.split(".")
+            current_tag[-1] = str(int(current_tag[-1]) + 1)
+            tag = ".".join(current_tag)
         logger.debug(f"Tagging commit with '{tag}'")
         executeCommand(["git", "-C", self.workdir, "tag", f"{tag}"], logger)
 
     def __getLatestTag(self):
 
-        result = executeCommand(
-            ["git", "-C", self.workdir, "describe", "--abbrev=0", "--tag"],
-            logger,
-            return_output=True,
-        )
-        return result
+        try:
+            result = executeCommand(
+                ["git", "-C", self.workdir, "describe", "--abbrev=0", "--tag"],
+                logger,
+                return_output=True,
+            )
+        except Exception as err:
+            logger.debug(
+                "Failed to get tags, presumably there are none. Reason: '%s'" % (err)
+            )
+            return None
+        else:
+            return result

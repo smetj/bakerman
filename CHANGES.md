@@ -1,5 +1,10 @@
 # Changes
 
+## Version 1.2.0
+
+- Fix bug when no tag exists 1.0.0 is generated
+- Add `variables` dict to config which maps to the looup function
+
 ## Version 1.1.3
 
 - Add support for Gitlab container repository lookups.

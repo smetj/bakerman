@@ -49,7 +49,7 @@ def lookupVariables(lookup_handler: Any, manifest: List[dict]) -> Dict[str, str]
                 )()
             variables[value["template_arg_name"]] = manifest_value_render_cache[
                 entry["type"]
-            ].lookup(value["name"])
+            ].lookup(**value["variables"])
     return variables
 
 
