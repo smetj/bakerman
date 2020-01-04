@@ -136,7 +136,7 @@ def start(args: argparse.Namespace) -> None:
         # And write it
         for key, value in variables.items():
             if manifest.updateVariable(key, value):
-                message = f"Variable '{key}' has been updated with '{value}'."
+                message = f"Variable '{key}' has been updated to '{value}'."
                 commit_message.append("- " + message)
                 logger.info(message)
             else:
@@ -153,6 +153,8 @@ def start(args: argparse.Namespace) -> None:
             target_file.render(variables)
 
             if args.no_repo:
+                logger.info(f"--no-repo set, not committing nor pushing any changes.")
+            else:
                 logger.info(f"Committing changes and pushing repo.")
                 repo.commit(COMMIT_MESSAGE % "\n".join(commit_message))
                 repo.push()

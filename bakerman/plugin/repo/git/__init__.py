@@ -28,6 +28,7 @@ from socket import gethostname
 from typing import Type, Optional
 from git import Repo  # type: ignore
 from git.remote import Remote  # type: ignore
+from git.util import Actor
 import os
 import semver  # type: ignore
 
@@ -91,8 +92,10 @@ class Git(Skeleton):
         hostname = gethostname()
         username = os.environ.get("USER")
 
-        Repo(self.workdir).index.commit(
-            message, author=f"Bakerman <{username}@{hostname}>"
+        repo = Repo(self.workdir)
+        repo.git.add(update=True)
+        repo.index.commit(
+            message, author=Actor(name="Bakerman", email=f"{username}@{hostname}")
         )
 
         self.__addIncrementedTag()
@@ -100,8 +103,9 @@ class Git(Skeleton):
         return None
 
     def push(self) -> None:
-        r = Repo(self.workdir)
-        Remote(r, "origin").push(tags=True)
+        repo = Repo(self.workdir)
+        origin = repo.remote(name="origin")
+        origin.push(tags=True)
         return None
 
     def __addIncrementedTag(self) -> None:

@@ -1,5 +1,10 @@
 # Changes
 
+## Version 1.2.4
+
+- Fix bug in --no-repo logic
+- Fix bug in setting Author on commit
+
 ## Version 1.2.3
 
 - Add support for more granular Alpine package lookups

@@ -32,7 +32,7 @@ logger = getLogger("plugin::repo")
 class Skeleton:
     def __init__(self, workdir, uri=None):
         self.uri = uri
-        self.workdir = workdir
+        self.workdir = os.path.abspath(workdir)
 
         try:
             logger.info("Checking prerequisites")
