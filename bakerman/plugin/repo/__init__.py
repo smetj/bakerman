@@ -44,8 +44,7 @@ class Skeleton:
         self.prepareDirectory()
 
         if self.checkValidRepo():
-            logger.debug("%s is a valid repository. Updating." % (self.workdir))
-            self.update()
+            logger.debug("%s is a valid repository." % (self.workdir))
         elif uri:
             logger.debug("%s is a not a valid repository. Cloning." % (self.workdir))
             self.clone()
@@ -54,7 +53,7 @@ class Skeleton:
                 "%s is a not a valid repository and no URI to clone. Giving up."
                 % (self.workdir)
             )
-            sys.exit(0)
+            sys.exit(1)
 
     def checkPrerequisites(self):
         raise NotImplementedError(
@@ -69,12 +68,6 @@ class Skeleton:
         )
 
     def clone(self):
-        raise NotImplementedError(
-            "`%s` method not implemented by `%s` plugin."
-            % (sys._getframe().f_code.co_name, self.__class__)
-        )
-
-    def update(self):
         raise NotImplementedError(
             "`%s` method not implemented by `%s` plugin."
             % (sys._getframe().f_code.co_name, self.__class__)

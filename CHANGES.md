@@ -1,5 +1,9 @@
 # Changes
 
+## Version 1.2.2
+
+- Remove `git pull` assume an existing repo is up to date.
+
 ## Version 1.2.1
 
 - Replace all git shell execs with gitpython

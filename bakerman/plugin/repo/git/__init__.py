@@ -87,12 +87,6 @@ class Git(Skeleton):
         Repo().clone_from(self.uri, self.workdir)
         return None
 
-    def update(self) -> None:
-
-        r = Repo(self.workdir)
-        Remote(r, "origin").pull()
-        return None
-
     def commit(self, message: str) -> None:
         hostname = gethostname()
         username = os.environ.get("USER")
