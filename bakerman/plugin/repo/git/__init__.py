@@ -24,10 +24,12 @@
 
 from bakerman.plugin.repo import Skeleton
 from bakerman.helper import getLogger
-from bakerman.helper import executeCommand
 from socket import gethostname
-import os
 from typing import Type, Optional
+from git import Repo  # type: ignore
+from git.remote import Remote  # type: ignore
+import os
+import semver  # type: ignore
 
 logger = getLogger("plugin:repo:git")
 
@@ -48,15 +50,10 @@ def discovery(uri: str, workdir: str) -> Optional[Type["Git"]]:
 
     if uri and uri.endswith(".git"):
         return Git
+    elif Repo(workdir).git_dir:
+        return Git
     else:
-        try:
-            executeCommand(
-                ["git", "-C", workdir, "status"], logger,
-            )
-        except Exception:
-            return None
-        else:
-            return Git
+        return None
 
 
 class Git(Skeleton):
@@ -76,77 +73,60 @@ class Git(Skeleton):
         Validates whether we can find the "git" command.
         """
 
-        executeCommand(["which", "git"], logger)
+        return None
 
-    def checkValidRepo(self):
+    def checkValidRepo(self) -> bool:
 
-        try:
-            executeCommand(
-                ["git", "-C", self.workdir, "status"], logger,
-            )
-        except Exception:
-            return False
-        else:
+        if Repo(self.workdir).git_dir:
             return True
+        else:
+            return False
 
-    def clone(self):
+    def clone(self) -> None:
 
-        executeCommand(
-            ["git", "-C", self.workdir, "clone", self.uri, self.workdir], logger
-        )
+        Repo().clone_from(self.uri, self.workdir)
+        return None
 
-    def update(self):
+    def update(self) -> None:
 
-        executeCommand(["git", "-C", self.workdir, "pull"], logger)
+        r = Repo(self.workdir)
+        Remote(r, "origin").pull()
+        return None
 
-    def commit(self, message):
+    def commit(self, message: str) -> None:
         hostname = gethostname()
         username = os.environ.get("USER")
 
-        executeCommand(
-            [
-                "git",
-                "-C",
-                self.workdir,
-                "commit",
-                "--author",
-                f"Bakerman <{username}@{hostname}>",
-                "-m",
-                message,
-                self.workdir,
-            ],
-            logger,
+        Repo(self.workdir).index.commit(
+            message, author=f"Bakerman <{username}@{hostname}>"
         )
 
         self.__addIncrementedTag()
 
-    def push(self):
-        executeCommand(["git", "-C", self.workdir, "push", "--tags"], logger)
+        return None
 
-    def __addIncrementedTag(self):
+    def push(self) -> None:
+        r = Repo(self.workdir)
+        Remote(r, "origin").push(tags=True)
+        return None
+
+    def __addIncrementedTag(self) -> None:
 
         current_tag = self.__getLatestTag()
         if current_tag is None:
             tag = "1.0.0"
         else:
-            current_tag.split(".")
-            current_tag[-1] = str(int(current_tag[-1]) + 1)
-            tag = ".".join(current_tag)
-        logger.debug(f"Tagging commit with '{tag}'")
-        executeCommand(["git", "-C", self.workdir, "tag", f"{tag}"], logger)
+            tag = semver.bump_minor(current_tag)
 
-    def __getLatestTag(self):
+        Repo(self.workdir).create_tag(tag)
 
+        return None
+
+    def __getLatestTag(self) -> Optional[str]:
+
+        r = Repo(self.workdir)
+        tags = sorted(r.tags, key=lambda t: t.commit.committed_datetime)
         try:
-            result = executeCommand(
-                ["git", "-C", self.workdir, "describe", "--abbrev=0", "--tag"],
-                logger,
-                return_output=True,
-            )
-        except Exception as err:
-            logger.debug(
-                "Failed to get tags, presumably there are none. Reason: '%s'" % (err)
-            )
+            return str(tags[-1])
+        except IndexError:
             return None
-        else:
-            return result

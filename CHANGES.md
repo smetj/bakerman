@@ -1,5 +1,10 @@
 # Changes
 
+## Version 1.2.1
+
+- Replace all git shell execs with gitpython
+- When incrementing the current tag version, increment minor.
+
 ## Version 1.2.0
 
 - Fix bug when no tag exists 1.0.0 is generated

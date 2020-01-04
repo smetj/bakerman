@@ -119,7 +119,6 @@ def start(args: argparse.Namespace) -> None:
         manifest_cls = discoverManifestHandler(args.workdir, args.manifest)
         manifest = manifest_cls(args.workdir, args.manifest)
         manifest_content = manifest.read()
-        manifest_content
 
         # Get all the different lookup handlers needed to discover the latest
         # values requested in the manifest file.  lookupVariables() is just a
