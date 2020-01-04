@@ -55,12 +55,17 @@ class AlpinePackage(Skeleton):
     The Bakerman version lookup plugin for Alpine Packages.
     """
 
-    def lookup(self, name: str) -> Optional[str]:
+    def lookup(
+        self, name: str, branch: str, repo: str = "main", arch: str = "x86_64"
+    ) -> Optional[str]:
         """
         Returns the latest package version off the package with name `name`.
 
         Args:
             name: The name of the package to lookup the latest available version.
+            branch: The Alpine branch name
+            repo: The Alpine repo name
+            arch: The platform architecture
 
         Returns:
             A version number.
@@ -68,11 +73,12 @@ class AlpinePackage(Skeleton):
 
         logger.debug("Doing a lookup for %s" % (name))
         response = requests.get(
-            f"https://pkgs.alpinelinux.org/packages?name={name}&branch=v3.10&repo=main&arch=x86_64"
+            f"https://pkgs.alpinelinux.org/packages?name={name}&branch={branch}&repo={repo}&arch={arch}"
         )
 
         page_content = BeautifulSoup(response.content, "html.parser")
 
         for item in page_content.find_all("td", class_="version"):
             return item.text
+
         return None

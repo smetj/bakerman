@@ -1,5 +1,10 @@
 # Changes
 
+## Version 1.2.3
+
+- Add support for more granular Alpine package lookups
+- Add --no-repo option which prevents any changes on the repo
+
 ## Version 1.2.2
 
 - Remove `git pull` assume an existing repo is up to date.

@@ -84,6 +84,13 @@ def parseArguments() -> argparse.Namespace:
         default="bakerman.target",
         help="The path of the target build file which --template will render into.",
     )
+    parser.add_argument(
+        "--no-repo",
+        dest="no_repo",
+        default=False,
+        action="store_true",
+        help="If defined, no repo commit & push is done.",
+    )
 
     return parser.parse_args()
 
@@ -145,9 +152,10 @@ def start(args: argparse.Namespace) -> None:
             )
             target_file.render(variables)
 
-            logger.info(f"Committing changes and pushing repo.")
-            repo.commit(COMMIT_MESSAGE % "\n".join(commit_message))
-            repo.push()
+            if args.no_repo:
+                logger.info(f"Committing changes and pushing repo.")
+                repo.commit(COMMIT_MESSAGE % "\n".join(commit_message))
+                repo.push()
         else:
             logger.info(
                 f"The manifest has not been updated. Not regenerating target file '{args.workdir}/{args.target}'"
