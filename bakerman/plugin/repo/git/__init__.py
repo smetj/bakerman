@@ -95,7 +95,8 @@ class Git(Skeleton):
         repo = Repo(self.workdir)
         repo.git.add(update=True)
         repo.index.commit(
-            message, author=Actor(name="Bakerman", email=f"{username}@{hostname}")
+            message + " [skip ci]",
+            author=Actor(name="Bakerman", email=f"{username}@{hostname}"),
         )
 
         self.__addIncrementedTag()

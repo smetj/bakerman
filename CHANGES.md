@@ -1,5 +1,9 @@
 # Changes
 
+## Version 1.2.5
+
+- Add `[skip ci]` to end of commit messages in order to prevent commit/job loops
+
 ## Version 1.2.4
 
 - Fix bug in --no-repo logic
