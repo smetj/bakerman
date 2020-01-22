@@ -24,12 +24,9 @@
 
 from bakerman.plugin.repo import Skeleton
 from bakerman.helper import getLogger
-from socket import gethostname
 from typing import Type, Optional
 from git import Repo  # type: ignore
-from git.remote import Remote  # type: ignore
-from git.util import Actor
-import os
+from git.repo.base import Repo as RRepo  # type: ignore
 import semver  # type: ignore
 import git
 
@@ -80,14 +77,17 @@ class Git(Skeleton):
 
     def checkValidRepo(self) -> bool:
 
-        if Repo(self.workdir).git_dir:
+        try:
+            Repo(self.workdir).git_dir
             return True
-        else:
+        except git.exc.InvalidGitRepositoryError:
             return False
+        else:
+            raise
 
     def clone(self) -> None:
 
-        Repo().clone_from(self.uri, self.workdir)
+        RRepo.clone_from(self.uri, self.workdir)
         return None
 
     def commit(self, message: str) -> None:
@@ -119,6 +119,6 @@ class Git(Skeleton):
     def __getLatestTag(self) -> Optional[str]:
 
         try:
-            return git.cmd.Git("./").describe(["--abbrev=0", "--tag"])
+            return git.cmd.Git(self.workdir).describe(["--abbrev=0", "--tag"])
         except git.exc.GitCommandError:
             return None

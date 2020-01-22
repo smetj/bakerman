@@ -1,5 +1,9 @@
 # Changes
 
+## Version 1.2.7
+
+- Fix various bugs related to repo handling
+
 ## Version 1.2.6
 
 - Adding debug messages

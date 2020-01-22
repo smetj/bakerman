@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = "bakerman"
-VERSION = "1.2.6"
+VERSION = "1.2.7"
 
 install_requires = ["requests", "jinja2", "bs4", "semver", "gitpython"]
 
@@ -56,7 +56,7 @@ class PyTest(TestCommand):
 setup(
     name=PROJECT,
     version=VERSION,
-    description="Update your Dockerfiles to include the latest containers and packages.",
+    description="Automatically update artifacts in config files.",
     long_description=long_description,
     author="Jelle Smet",
     author_email="development@smetj.net",
