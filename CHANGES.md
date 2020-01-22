@@ -1,5 +1,15 @@
 # Changes
 
+## Version 1.2.6
+
+- Adding debug messages
+- Use git commands directly
+
+## Versionn 1.2.5
+
+- Adding debug messages
+- Use git commands directly
+
 ## Version 1.2.5
 
 - Add `[skip ci]` to end of commit messages in order to prevent commit/job loops

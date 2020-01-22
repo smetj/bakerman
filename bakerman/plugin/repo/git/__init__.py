@@ -31,6 +31,8 @@ from git.remote import Remote  # type: ignore
 from git.util import Actor
 import os
 import semver  # type: ignore
+import git
+
 
 logger = getLogger("plugin:repo:git")
 
@@ -89,24 +91,15 @@ class Git(Skeleton):
         return None
 
     def commit(self, message: str) -> None:
-        hostname = gethostname()
-        username = os.environ.get("USER")
-
-        repo = Repo(self.workdir)
-        repo.git.add(update=True)
-        repo.index.commit(
-            message + " [skip ci]",
-            author=Actor(name="Bakerman", email=f"{username}@{hostname}"),
-        )
-
+        git.cmd.Git(self.workdir).commit(["-m", message, "-a"])
+        logger.debug(f"Committed changes.")
         self.__addIncrementedTag()
 
         return None
 
     def push(self) -> None:
-        repo = Repo(self.workdir)
-        origin = repo.remote(name="origin")
-        origin.push(tags=True)
+        git.cmd.Git(self.workdir).push(["--tags", "origin", "master"])
+        logger.debug(f"Pushing commit.")
         return None
 
     def __addIncrementedTag(self) -> None:
@@ -117,15 +110,15 @@ class Git(Skeleton):
         else:
             tag = semver.bump_minor(current_tag)
 
-        Repo(self.workdir).create_tag(tag)
+        git.cmd.Git(self.workdir).tag([tag])
+
+        logger.debug(f"Added tag {tag} to current commit.")
 
         return None
 
     def __getLatestTag(self) -> Optional[str]:
 
-        r = Repo(self.workdir)
-        tags = sorted(r.tags, key=lambda t: t.commit.committed_datetime)
         try:
-            return str(tags[-1])
-        except IndexError:
+            return git.cmd.Git("./").describe(["--abbrev=0", "--tag"])
+        except git.exc.GitCommandError:
             return None

@@ -27,7 +27,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 
 PROJECT = "bakerman"
-VERSION = "1.2.5"
+VERSION = "1.2.6"
 
 install_requires = ["requests", "jinja2", "bs4", "semver", "gitpython"]
 
